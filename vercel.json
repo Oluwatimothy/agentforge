@@ -1,0 +1,16 @@
+{
+  "buildCommand": "prisma generate && next build",
+  "installCommand": "npm install",
+  "framework": "nextjs",
+  "regions": ["iad1"],
+  "env": {
+    "DATABASE_URL": "@agentforge-db-url",
+    "ZEROG_RPC_URL": "@zerog-rpc-url",
+    "ZEROG_STORAGE_RPC": "@zerog-storage-rpc",
+    "ZEROG_INDEXER_RPC": "@zerog-indexer-rpc",
+    "ZEROG_PRIVATE_KEY": "@zerog-private-key",
+    "OPENAI_API_KEY": "@openai-api-key",
+    "OPENAI_MODEL": "gpt-4o-mini",
+    "JWT_SECRET": "@agentforge-jwt-secret"
+  }
+}

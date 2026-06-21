@@ -1,0 +1,219 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AgentType {
+  RESEARCH
+  CODING
+  MARKET_ANALYST
+  STRATEGIST
+}
+
+enum AgentStatus {
+  IDLE
+  THINKING
+  GENERATING
+  TRADING
+}
+
+enum AssetType {
+  RESEARCH_REPORT
+  MARKET_ANALYSIS
+  TECHNICAL_DOCS
+  STARTUP_INTEL
+  CODE_ARCHITECTURE
+  COMPETITIVE_ANALYSIS
+}
+
+enum AssetStatus {
+  GENERATING
+  STORED
+  LISTED
+  SOLD
+}
+
+enum TransactionType {
+  ASSET_CREATION
+  ASSET_PURCHASE
+  REPUTATION_GAIN
+  MEMORY_WRITE
+  MEMORY_READ
+}
+
+model Agent {
+  id                String      @id @default(cuid())
+  name              String
+  type              AgentType
+  status            AgentStatus @default(IDLE)
+  avatar            String?
+  description       String
+  reputation        Float       @default(0)
+  totalEarned       Float       @default(0)
+  totalSpent        Float       @default(0)
+  walletAddress     String?     @unique
+  
+  // 0G Storage references
+  memoryRootHash    String?     // Latest 0G storage root for memories
+  profileStorageId  String?     // 0G storage ID for agent profile
+
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+
+  // Relations
+  createdAssets     KnowledgeAsset[] @relation("AssetCreator")
+  ownedAssets       AgentAsset[]
+  sentTransactions  Transaction[]    @relation("Sender")
+  receivedTransactions Transaction[] @relation("Receiver")
+  memories          AgentMemory[]
+  activities        AgentActivity[]
+
+  @@index([type])
+  @@index([reputation])
+}
+
+model AgentMemory {
+  id            String   @id @default(cuid())
+  agentId       String
+  agent         Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  
+  content       String   // The memory content
+  memoryType    String   // "task_completion", "knowledge_acquired", "trade_executed", etc.
+  importance    Float    @default(0.5) // 0-1 importance score
+  
+  // 0G Storage references
+  storageId     String?  // 0G storage transaction ID
+  storageTxHash String?  // 0G chain transaction hash
+  rootHash      String?  // Merkle root hash on 0G
+  
+  embedding     Float[]  // Vector embedding for semantic search
+  tags          String[]
+  
+  createdAt     DateTime @default(now())
+  
+  @@index([agentId])
+  @@index([memoryType])
+}
+
+model KnowledgeAsset {
+  id            String      @id @default(cuid())
+  title         String
+  description   String
+  assetType     AssetType
+  status        AssetStatus @default(GENERATING)
+  
+  // Content
+  content       String      // Full content (cached locally)
+  contentHash   String?     // SHA256 hash of content
+  
+  // 0G Storage references (CRITICAL - removing 0G breaks this)
+  storageId     String?     // 0G storage object ID
+  storageTxHash String?     // 0G chain tx hash
+  rootHash      String?     // Merkle root on 0G
+  storageUrl    String?     // Retrieval URL
+  
+  // Marketplace
+  price         Float       @default(0)
+  isListed      Boolean     @default(false)
+  
+  // Metadata
+  tags          String[]
+  qualityScore  Float       @default(0)
+  viewCount     Int         @default(0)
+  downloadCount Int         @default(0)
+  
+  // Creator
+  creatorId     String
+  creator       Agent       @relation("AssetCreator", fields: [creatorId], references: [id])
+  
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  
+  // Relations
+  owners        AgentAsset[]
+  transactions  Transaction[]
+  
+  @@index([assetType])
+  @@index([isListed])
+  @@index([creatorId])
+  @@index([qualityScore])
+}
+
+model AgentAsset {
+  id          String         @id @default(cuid())
+  agentId     String
+  agent       Agent          @relation(fields: [agentId], references: [id])
+  assetId     String
+  asset       KnowledgeAsset @relation(fields: [assetId], references: [id])
+  
+  acquiredAt  DateTime       @default(now())
+  pricePaid   Float          @default(0)
+  
+  @@unique([agentId, assetId])
+  @@index([agentId])
+  @@index([assetId])
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  type            TransactionType
+  
+  senderId        String?
+  sender          Agent?          @relation("Sender", fields: [senderId], references: [id])
+  receiverId      String?
+  receiver        Agent?          @relation("Receiver", fields: [receiverId], references: [id])
+  
+  assetId         String?
+  asset           KnowledgeAsset? @relation(fields: [assetId], references: [id])
+  
+  amount          Float           @default(0)
+  description     String
+  
+  // 0G Chain references
+  chainTxHash     String?         // Transaction hash on 0G chain
+  blockNumber     BigInt?
+  
+  metadata        Json?
+  
+  createdAt       DateTime        @default(now())
+  
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model AgentActivity {
+  id          String   @id @default(cuid())
+  agentId     String
+  agent       Agent    @relation(fields: [agentId], references: [id], onDelete: Cascade)
+  
+  action      String   // "created_asset", "purchased_asset", "stored_memory", etc.
+  description String
+  metadata    Json?
+  
+  // 0G reference if applicable
+  storageRef  String?
+  
+  createdAt   DateTime @default(now())
+  
+  @@index([agentId])
+  @@index([createdAt])
+}
+
+model MarketplaceStats {
+  id              String   @id @default("singleton")
+  totalAssets     Int      @default(0)
+  totalAgents     Int      @default(0)
+  totalVolume     Float    @default(0)
+  totalMemories   Int      @default(0)
+  total0GStored   BigInt   @default(0) // bytes stored on 0G
+  updatedAt       DateTime @updatedAt
+}

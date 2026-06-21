@@ -1,8 +1,7 @@
 /**
- * 0G Storage Integration Module - FIXED for SDK 0.3.3
- * Uses MemData for in-memory uploads (no temp files)
- * Flow contract is auto-discovered by indexer
- * Indexer: indexer-storage-testnet-turbo.0g.ai
+ * 0G Storage Integration Module
+ * Uses @0gfoundation/0g-storage-ts-sdk (latest official SDK)
+ * MemData for in-memory uploads, flow contract auto-discovered
  */
 
 import crypto from "crypto";
@@ -26,19 +25,13 @@ export interface StorageRetrieveResult {
   error?: string;
 }
 
-// In-memory store for demo/fallback mode
 const simulatedStorage = new Map<string, string>();
 
 export function isZeroGConfigured(): boolean {
   const pk = ZEROG_PRIVATE_KEY;
-  return !!pk &&
-    pk !== "your-private-key-here" &&
-    pk.length > 10;
+  return !!pk && pk !== "your-private-key-here" && pk.length > 10;
 }
 
-/**
- * Upload data to 0G Storage using MemData (no temp files)
- */
 export async function uploadToZeroG(
   data: string | object,
   metadata?: Record<string, string>
@@ -52,36 +45,29 @@ export async function uploadToZeroG(
   }
 
   try {
-    const { Indexer, MemData } = await import("@0glabs/0g-ts-sdk");
+    const { Indexer, MemData } = await import("@0gfoundation/0g-storage-ts-sdk");
     const { ethers } = await import("ethers");
 
     const provider = new ethers.JsonRpcProvider(ZEROG_RPC_URL);
     const signer = new ethers.Wallet(ZEROG_PRIVATE_KEY, provider);
 
-    // Use MemData for in-memory upload - no temp files needed
     const memData = new MemData(new TextEncoder().encode(content));
-
-    // Indexer auto-discovers flow contract
     const indexer = new Indexer(ZEROG_INDEXER_RPC);
 
     const [tx, err] = await indexer.upload(memData, ZEROG_RPC_URL, signer);
 
     if (err !== null) {
       console.error("[0G] Upload error:", err);
-      // Fall back to simulation
       return simulateZeroGUpload(content, contentHash, metadata);
     }
 
-    // Handle both single file and fragmented file response shapes
     let txHash: string;
     let rootHash: string;
 
     if ("rootHash" in tx) {
-      // Single file (most common for our data sizes)
       rootHash = tx.rootHash as string;
       txHash = tx.txHash as string;
     } else {
-      // Fragmented file (>4GB, shouldn't happen for us)
       const txArr = tx as { rootHashes: string[]; txHashes: string[] };
       rootHash = txArr.rootHashes[0];
       txHash = txArr.txHashes[0];
@@ -102,40 +88,31 @@ export async function uploadToZeroG(
   }
 }
 
-/**
- * Retrieve data from 0G Storage by root hash
- */
 export async function retrieveFromZeroG(rootHash: string): Promise<StorageRetrieveResult> {
   if (!isZeroGConfigured()) {
     return simulateZeroGRetrieve(rootHash);
   }
 
   try {
-    const { Indexer } = await import("@0glabs/0g-ts-sdk");
-    const { ethers } = await import("ethers");
-
-    const provider = new ethers.JsonRpcProvider(ZEROG_RPC_URL);
-    const signer = new ethers.Wallet(ZEROG_PRIVATE_KEY, provider);
+    const { Indexer } = await import("@0gfoundation/0g-storage-ts-sdk");
     const indexer = new Indexer(ZEROG_INDEXER_RPC);
+    const tmpPath = `/tmp/agentforge_${Date.now()}.json`;
+    const err = await indexer.download(rootHash, tmpPath, true);
 
-    // Use downloadToBlob for in-memory retrieval (browser-safe)
-    const [blob, dlErr] = await (indexer as any).downloadToBlob(rootHash, { proof: true });
-
-    if (dlErr) {
-      throw new Error(`Download error: ${dlErr}`);
+    if (err !== null) {
+      throw new Error(`Download error: ${err}`);
     }
 
-    const text = await (blob as Blob).text();
-    return { success: true, data: text };
+    const fs = await import("fs");
+    const data = fs.readFileSync(tmpPath, "utf-8");
+    fs.unlinkSync(tmpPath);
+    return { success: true, data };
   } catch (error) {
     console.error("[0G] Retrieve error:", error);
     return simulateZeroGRetrieve(rootHash);
   }
 }
 
-/**
- * Upload agent memory batch to 0G Storage
- */
 export async function uploadAgentMemory(
   agentId: string,
   memories: object[]
@@ -151,9 +128,6 @@ export async function uploadAgentMemory(
   return uploadToZeroG(payload, { type: "agent_memory", agentId });
 }
 
-/**
- * Upload knowledge asset to 0G Storage
- */
 export async function uploadKnowledgeAsset(asset: {
   id: string;
   title: string;
@@ -172,9 +146,6 @@ export async function uploadKnowledgeAsset(asset: {
   return uploadToZeroG(payload, { type: "knowledge_asset", assetType: asset.assetType });
 }
 
-/**
- * Record ownership on 0G
- */
 export async function recordOwnership(record: {
   assetId: string;
   ownerId: string;
@@ -192,9 +163,6 @@ export async function recordOwnership(record: {
   return uploadToZeroG(payload, { type: "ownership_record", assetId: record.assetId });
 }
 
-/**
- * Persist reputation update to 0G
- */
 export async function persistReputation(
   agentId: string,
   reputationData: {
@@ -213,10 +181,6 @@ export async function persistReputation(
   };
   return uploadToZeroG(payload, { type: "reputation_record", agentId });
 }
-
-// ============================================================
-// SIMULATION LAYER - used when no private key configured
-// ============================================================
 
 async function simulateZeroGUpload(
   content: string,

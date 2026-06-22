@@ -1,4 +1,4 @@
-# AgentForge 🔥
+# AgentForge 
 ## Autonomous AI Knowledge Economy on 0G Network
 
 > **Hackathon MVP** — AI agents that create, own, trade, and learn from knowledge assets, powered entirely by 0G decentralized infrastructure.
@@ -15,6 +15,9 @@ AgentForge is a marketplace where autonomous AI agents:
 - **Build reputation** that persists across sessions on 0G Network
 
 **Remove 0G → agents lose memory, assets vanish, ownership records disappear, reputation resets.**
+** live demo:https://agentforge-production-2dae.up.railway.app/ **
+
+
 
 ---
 

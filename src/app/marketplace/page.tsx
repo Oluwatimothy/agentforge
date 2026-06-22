@@ -44,9 +44,15 @@ export default function MarketplacePage() {
   const assets = data?.data || [];
   const stats = (data as { stats?: MarketplaceStats })?.stats;
 
-  // IDs owned by active agent
+// Fetch owned asset IDs for active agent from API
+  const { data: activeAgentData } = useQuery({
+    queryKey: ["agent-owned", activeAgent?.id],
+    queryFn: () => api.get<{ ownedAssets: { assetId: string }[] }>(`/api/agents/${activeAgent?.id}`),
+    enabled: !!activeAgent?.id,
+  });
+
   const ownedIds = new Set(
-    activeAgent?.ownedAssets?.map((oa) => oa.assetId) || []
+    (activeAgentData?.data as { ownedAssets?: { assetId: string }[] })?.ownedAssets?.map((oa) => oa.assetId) || []
   );
 
   const handlePurchase = async (asset: KnowledgeAsset) => {

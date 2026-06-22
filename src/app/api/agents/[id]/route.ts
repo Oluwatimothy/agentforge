@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await context.params;
+
+    if (!id || id === "undefined") {
+      return NextResponse.json(
+        { success: false, error: "Agent ID required" },
+        { status: 400 }
+      );
+    }
+
     const agent = await prisma.agent.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         createdAssets: {
           orderBy: { createdAt: "desc" },
@@ -53,7 +62,7 @@ export async function GET(
 
     const transactions = await prisma.transaction.findMany({
       where: {
-        OR: [{ senderId: params.id }, { receiverId: params.id }],
+        OR: [{ senderId: id }, { receiverId: id }],
       },
       include: {
         asset: {
@@ -80,15 +89,16 @@ export async function GET(
 }
 
 export async function PUT(
-  req: NextRequest,
-  { params }: { params: { id: string } }
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const body = await req.json();
+    const { id } = await context.params;
+    const body = await request.json();
     const { status } = body;
 
     const agent = await prisma.agent.update({
-      where: { id: params.id },
+      where: { id },
       data: { status },
     });
 

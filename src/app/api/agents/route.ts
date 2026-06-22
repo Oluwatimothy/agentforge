@@ -88,11 +88,11 @@ export async function POST(req: NextRequest) {
       agentType: type,
     });
 
-    // Update agent with 0G storage reference
+ // Update agent with 0G storage reference - save txHash for explorer links
     const updatedAgent = await prisma.agent.update({
       where: { id: agent.id },
       data: {
-        profileStorageId: storageResult.storageId,
+        profileStorageId: storageResult.txHash,
       },
     });
 

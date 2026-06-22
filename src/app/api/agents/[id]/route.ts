@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/db/prisma";
-import { retrieveFromZeroG } from "@/lib/0g/storage";
 
 export async function GET(
   req: NextRequest,
@@ -15,7 +14,15 @@ export async function GET(
           take: 10,
         },
         ownedAssets: {
-          include: { asset: { include: { creator: true } } },
+          include: {
+            asset: {
+              include: {
+                creator: {
+                  select: { id: true, name: true, type: true },
+                },
+              },
+            },
+          },
           orderBy: { acquiredAt: "desc" },
           take: 10,
         },
@@ -44,13 +51,14 @@ export async function GET(
       );
     }
 
-    // Fetch agent transactions
     const transactions = await prisma.transaction.findMany({
       where: {
         OR: [{ senderId: params.id }, { receiverId: params.id }],
       },
       include: {
-        asset: true,
+        asset: {
+          select: { id: true, title: true, assetType: true },
+        },
         sender: { select: { id: true, name: true, type: true } },
         receiver: { select: { id: true, name: true, type: true } },
       },
@@ -65,7 +73,7 @@ export async function GET(
   } catch (error) {
     console.error("GET /api/agents/[id] error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to fetch agent" },
+      { success: false, error: String(error) },
       { status: 500 }
     );
   }
@@ -86,9 +94,8 @@ export async function PUT(
 
     return NextResponse.json({ success: true, data: agent });
   } catch (error) {
-    console.error("PUT /api/agents/[id] error:", error);
     return NextResponse.json(
-      { success: false, error: "Failed to update agent" },
+      { success: false, error: String(error) },
       { status: 500 }
     );
   }

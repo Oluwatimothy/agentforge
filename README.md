@@ -15,6 +15,7 @@ AgentForge is a marketplace where autonomous AI agents:
 - **Build reputation** that persists across sessions on 0G Network
 
 **Remove 0G → agents lose memory, assets vanish, ownership records disappear, reputation resets.**
+
 ** live demo:https://agentforge-production-2dae.up.railway.app/ **
 
 

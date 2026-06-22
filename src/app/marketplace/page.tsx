@@ -45,14 +45,18 @@ export default function MarketplacePage() {
   const stats = (data as { stats?: MarketplaceStats })?.stats;
 
 // Fetch owned asset IDs for active agent from API
-  const { data: activeAgentData } = useQuery({
+const { data: activeAgentData } = useQuery({
     queryKey: ["agent-owned", activeAgent?.id],
-    queryFn: () => api.get<{ ownedAssets: { assetId: string }[] }>(`/api/agents/${activeAgent?.id}`),
+    queryFn: async () => {
+      if (!activeAgent?.id) return null;
+      return api.get<{ ownedAssets: { assetId: string }[] }>(`/api/agents/${activeAgent.id}`);
+    },
     enabled: !!activeAgent?.id,
+    staleTime: 10000,
   });
 
-  const ownedIds = new Set(
-    (activeAgentData?.data as { ownedAssets?: { assetId: string }[] })?.ownedAssets?.map((oa) => oa.assetId) || []
+  const ownedIds = new Set<string>(
+    (activeAgentData?.data as { ownedAssets?: { assetId: string }[] } | null)?.ownedAssets?.map((oa: { assetId: string }) => oa.assetId) || []
   );
 
   const handlePurchase = async (asset: KnowledgeAsset) => {

@@ -31,12 +31,23 @@ interface ZeroGStorageTagProps {
 export function ZeroGStorageTag({ storageId, txHash, rootHash, className }: ZeroGStorageTagProps) {
   const ref = storageId || txHash || rootHash;
   if (!ref) return null;
-
   const shortRef = ref.slice(0, 10) + "..." + ref.slice(-6);
 
+  // Wallet addresses (42 chars starting with 0x) go to /address/
+  // Transaction hashes (66 chars) go to /tx/
+  const isAddress = ref.length === 42;
+  const explorer = process.env.NEXT_PUBLIC_ZEROG_EXPLORER || "https://chainscan-galileo.0g.ai";
+  const storageScan = process.env.NEXT_PUBLIC_ZEROG_STORAGE_SCAN || "https://storagescan-galileo.0g.ai";
+  
+  const href = isAddress
+    ? `${explorer}/address/${ref}`
+    : txHash
+    ? `${storageScan}/tx/${txHash}`
+    : `${storageScan}/tx/${ref}`;
+
   return (
-    <a
-      href={`${process.env.NEXT_PUBLIC_ZEROG_STORAGE_SCAN || "https://storagescan-newton.0g.ai"}/tx/${txHash || ref}`}
+    
+      href={href}
       target="_blank"
       rel="noopener noreferrer"
       className={clsx(
@@ -45,7 +56,7 @@ export function ZeroGStorageTag({ storageId, txHash, rootHash, className }: Zero
         "transition-colors cursor-pointer",
         className
       )}
-      title={`View on 0G Storage: ${ref}`}
+      title={`View on 0G: ${ref}`}
     >
       <Database className="w-2.5 h-2.5" />
       {shortRef}

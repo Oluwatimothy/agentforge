@@ -3,21 +3,27 @@ import prisma from "@/lib/db/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    if (!params.id) {
+    const id = context.params.id;
+
+    if (!id || id === "undefined") {
       return NextResponse.json({ success: true, data: [] });
     }
 
     const owned = await prisma.agentAsset.findMany({
-      where: { agentId: params.id },
+      where: { agentId: id },
       select: { assetId: true },
     });
 
+    const assetIds = owned.map((o: { assetId: string }) => o.assetId);
+
+    console.log(`[owned] Agent ${id} owns ${assetIds.length} assets`);
+
     return NextResponse.json({
       success: true,
-      data: owned.map((o) => o.assetId),
+      data: assetIds,
     });
   } catch (error) {
     console.error("GET owned error:", error);

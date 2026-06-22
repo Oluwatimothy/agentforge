@@ -9,15 +9,19 @@ interface ZeroGBadgeProps {
   className?: string;
 }
 
-export function ZeroGBadge({ showDot = false, size = "sm", className }: ZeroGBadgeProps) {
+export function ZeroGStorageTag({ storageId, txHash, rootHash, className }: ZeroGStorageTagProps) {
+  const ref = storageId || txHash || rootHash;
+  if (!ref) return null;
+  const shortRef = ref.slice(0, 10) + "..." + ref.slice(-6);
+  const isAddress = ref.length === 42;
+  const explorer = "https://chainscan-galileo.0g.ai";
+  const storageScan = "https://storagescan-galileo.0g.ai";
+  const href = isAddress ? `${explorer}/address/${ref}` : `${storageScan}/tx/${txHash || ref}`;
   return (
-    <div className={clsx("zerog-badge", className)}>
-      {showDot && (
-        <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse flex-shrink-0" />
-      )}
-      <Database className="w-3 h-3 flex-shrink-0" />
-      <span>0G Network</span>
-    </div>
+    <a href={href} target="_blank" rel="noopener noreferrer" className={clsx("inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono", "bg-cyan-500/8 border border-cyan-500/20 text-cyan-400/80 hover:text-cyan-300 hover:border-cyan-500/40", "transition-colors cursor-pointer", className)} title={`View on 0G: ${ref}`}>
+      <Database className="w-2.5 h-2.5" />
+      {shortRef}
+    </a>
   );
 }
 

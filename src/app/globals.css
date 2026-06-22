@@ -4,26 +4,26 @@
 
 @layer base {
 :root {
-    --background: 220 20% 6%;
-    --foreground: 210 15% 92%;
-    --card: 220 18% 9%;
-    --card-foreground: 210 15% 92%;
-    --popover: 220 18% 9%;
-    --popover-foreground: 210 15% 92%;
-    --primary: 162 80% 45%;
-    --primary-foreground: 0 0% 0%;
-    --secondary: 220 15% 15%;
-    --secondary-foreground: 210 15% 75%;
-    --muted: 220 15% 12%;
-    --muted-foreground: 210 12% 50%;
-    --accent: 162 80% 45%;
-    --accent-foreground: 0 0% 0%;
+    --background: 30 15% 6%;
+    --foreground: 35 25% 90%;
+    --card: 30 12% 9%;
+    --card-foreground: 35 25% 90%;
+    --popover: 30 12% 9%;
+    --popover-foreground: 35 25% 90%;
+    --primary: 35 70% 55%;
+    --primary-foreground: 30 15% 6%;
+    --secondary: 30 10% 14%;
+    --secondary-foreground: 35 20% 70%;
+    --muted: 30 10% 11%;
+    --muted-foreground: 35 12% 48%;
+    --accent: 35 70% 55%;
+    --accent-foreground: 30 15% 6%;
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
-    --border: 220 15% 16%;
-    --input: 220 15% 12%;
-    --ring: 162 80% 45%;
-    --radius: 0.5rem;
+    --border: 30 10% 15%;
+    --input: 30 10% 11%;
+    --ring: 35 70% 55%;
+    --radius: 0.4rem;
   }
 }
 
@@ -36,7 +36,7 @@
 body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
-    background: #080c0f;
+    background: #0d0a07;
   }
 
   ::-webkit-scrollbar {
@@ -47,43 +47,43 @@ body {
     background: rgba(255, 255, 255, 0.03);
   }
   ::-webkit-scrollbar-thumb {
-    background: rgba(91, 110, 242, 0.4);
+    background: rgba(212, 148, 58, 0.4);
     border-radius: 3px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(91, 110, 242, 0.7);
+    background: rgba(212, 148, 58, 0.7);
   }
 }
 
 @layer components {
   /* Glass card effect */
   .glass-card {
-    background: rgba(255, 255, 255, 0.03);
+    background: rgba(255, 240, 220, 0.03);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.07);
-    border-radius: 16px;
+    border: 1px solid rgba(255, 220, 170, 0.08);
+    border-radius: 8px;
   }
 
   .glass-card-hover {
     @apply glass-card transition-all duration-300;
   }
   .glass-card-hover:hover {
-    background: rgba(91, 110, 242, 0.06);
-    border-color: rgba(91, 110, 242, 0.25);
+    background: rgba(210, 155, 75, 0.06);
+    border-color: rgba(210, 155, 75, 0.25);
     transform: translateY(-2px);
-    box-shadow: 0 8px 32px rgba(91, 110, 242, 0.15);
+    box-shadow: 0 8px 32px rgba(210, 155, 75, 0.12);
   }
 
   /* Gradient text */
   .gradient-text {
-    background: linear-gradient(135deg, #7c97f8 0%, #22d3ee 50%, #a78bfa 100%);
+    background: linear-gradient(135deg, #e8c170 0%, #f5e6c8 50%, #c9913d 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
 
   .gradient-text-forge {
-    background: linear-gradient(135deg, #5b6ef2 0%, #22d3ee 100%);
+    background: linear-gradient(135deg, #d4943a 0%, #f0d080 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -95,12 +95,12 @@ body {
     align-items: center;
     gap: 4px;
     padding: 2px 8px;
-    background: rgba(34, 211, 238, 0.1);
-    border: 1px solid rgba(34, 211, 238, 0.25);
-    border-radius: 100px;
+    background: rgba(212, 148, 58, 0.1);
+    border: 1px solid rgba(212, 148, 58, 0.3);
+    border-radius: 4px;
     font-size: 10px;
     font-weight: 600;
-    color: #22d3ee;
+    color: #d4943a;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     font-family: var(--font-mono), monospace;
@@ -108,11 +108,11 @@ body {
 
   /* Glow effects */
   .glow-blue {
-    box-shadow: 0 0 20px rgba(91, 110, 242, 0.4);
+    box-shadow: 0 0 20px rgba(212, 148, 58, 0.3);
   }
 
   .glow-cyan {
-    box-shadow: 0 0 20px rgba(34, 211, 238, 0.4);
+    box-shadow: 0 0 20px rgba(240, 200, 120, 0.3);
   }
 
   /* Pulse dot */
@@ -132,8 +132,8 @@ body {
   /* Grid background */
   .grid-bg {
     background-image:
-      linear-gradient(rgba(91, 110, 242, 0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(91, 110, 242, 0.03) 1px, transparent 1px);
+      linear-gradient(rgba(212, 148, 58, 0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(212, 148, 58, 0.03) 1px, transparent 1px);
     background-size: 40px 40px;
   }
 
@@ -149,22 +149,22 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, rgba(91, 110, 242, 0.6), transparent);
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(212, 148, 58, 0.5), transparent);
   }
 
   /* Agent type badges */
   .badge-research {
-    @apply bg-violet-500/15 text-violet-300 border border-violet-500/25;
+    @apply bg-amber-500/15 text-amber-300 border border-amber-500/25;
   }
   .badge-coding {
-    @apply bg-cyan-500/15 text-cyan-300 border border-cyan-500/25;
+    @apply bg-orange-500/15 text-orange-300 border border-orange-500/25;
   }
   .badge-market {
-    @apply bg-emerald-500/15 text-emerald-300 border border-emerald-500/25;
+    @apply bg-yellow-500/15 text-yellow-300 border border-yellow-500/25;
   }
   .badge-strategist {
-    @apply bg-amber-500/15 text-amber-300 border border-amber-500/25;
+    @apply bg-stone-500/15 text-stone-300 border border-stone-500/25;
   }
 
   /* Data stream animation */
@@ -172,7 +172,7 @@ body {
     background: linear-gradient(
       90deg,
       transparent 0%,
-      rgba(34, 211, 238, 0.6) 50%,
+      rgba(212, 148, 58, 0.6) 50%,
       transparent 100%
     );
     background-size: 200% 100%;
@@ -200,7 +200,6 @@ body {
   50% { opacity: 1; }
 }
 
-/* Typing cursor animation */
 @keyframes blink {
   0%, 100% { opacity: 1; }
   50% { opacity: 0; }
@@ -211,7 +210,6 @@ body {
   margin-left: 2px;
 }
 
-/* Network lines animation */
 .network-line {
   stroke-dasharray: 200;
   stroke-dashoffset: 200;

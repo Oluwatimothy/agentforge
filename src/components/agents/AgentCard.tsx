@@ -1,15 +1,15 @@
 "use client";
 
-import { Brain, TrendingUp, Database, Package, Star } from "lucide-react";
+import { Brain, Star, Trash2 } from "lucide-react";
 import { Agent, AGENT_TYPE_CONFIG } from "@/types";
 import { ZeroGStorageTag } from "@/components/shared/ZeroGBadge";
 import { clsx } from "clsx";
-import Link from "next/link";
 
 interface AgentCardProps {
   agent: Agent;
   isActive?: boolean;
   onSelect?: (agent: Agent) => void;
+  onDelete?: (agent: Agent) => void;
   compact?: boolean;
 }
 
@@ -27,7 +27,7 @@ const STATUS_CONFIG = {
   TRADING: { label: "Trading", color: "bg-emerald-400 animate-pulse" },
 };
 
-export function AgentCard({ agent, isActive, onSelect, compact }: AgentCardProps) {
+export function AgentCard({ agent, isActive, onSelect, onDelete, compact }: AgentCardProps) {
   const typeConfig = AGENT_TYPE_CONFIG[agent.type];
   const statusConfig = STATUS_CONFIG[agent.status] || STATUS_CONFIG.IDLE;
   const assetCount = agent._count?.createdAssets ?? agent.createdAssets?.length ?? 0;
@@ -44,9 +44,22 @@ export function AgentCard({ agent, isActive, onSelect, compact }: AgentCardProps
         onSelect && "cursor-pointer"
       )}
     >
-      {/* Active indicator */}
       {isActive && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-forge-500 to-transparent" />
+      )}
+
+      {onDelete && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            if (confirm(`Delete ${agent.name}? This cannot be undone.`)) {
+              onDelete(agent);
+            }
+          }}
+          className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100 z-10"
+        >
+          <Trash2 className="w-3.5 h-3.5" />
+        </button>
       )}
 
       <div className="flex items-start justify-between mb-4">

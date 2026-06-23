@@ -7,14 +7,12 @@ export async function GET(
 ) {
   try {
     const { id } = await context.params;
-
     if (!id || id === "undefined") {
       return NextResponse.json(
         { success: false, error: "Agent ID required" },
         { status: 400 }
       );
     }
-
     const agent = await prisma.agent.findUnique({
       where: { id },
       include: {
@@ -52,14 +50,12 @@ export async function GET(
         },
       },
     });
-
     if (!agent) {
       return NextResponse.json(
         { success: false, error: "Agent not found" },
         { status: 404 }
       );
     }
-
     const transactions = await prisma.transaction.findMany({
       where: {
         OR: [{ senderId: id }, { receiverId: id }],
@@ -74,7 +70,6 @@ export async function GET(
       orderBy: { createdAt: "desc" },
       take: 20,
     });
-
     return NextResponse.json({
       success: true,
       data: { ...agent, transactions },
@@ -96,13 +91,34 @@ export async function PUT(
     const { id } = await context.params;
     const body = await request.json();
     const { status } = body;
-
     const agent = await prisma.agent.update({
       where: { id },
       data: { status },
     });
-
     return NextResponse.json({ success: true, data: agent });
+  } catch (error) {
+    return NextResponse.json(
+      { success: false, error: String(error) },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(
+  request: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    await prisma.agentActivity.deleteMany({ where: { agentId: id } });
+    await prisma.agentMemory.deleteMany({ where: { agentId: id } });
+    await prisma.transaction.deleteMany({
+      where: { OR: [{ senderId: id }, { receiverId: id }] },
+    });
+    await prisma.agentAsset.deleteMany({ where: { agentId: id } });
+    await prisma.knowledgeAsset.deleteMany({ where: { creatorId: id } });
+    await prisma.agent.delete({ where: { id } });
+    return NextResponse.json({ success: true, message: "Agent deleted" });
   } catch (error) {
     return NextResponse.json(
       { success: false, error: String(error) },

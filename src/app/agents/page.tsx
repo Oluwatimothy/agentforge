@@ -41,13 +41,27 @@ export default function AgentsPage() {
     toast(`Switched to ${agent.name}`, { icon: "🤖" });
   };
 
+  const handleDeleteAgent = async (agent: Agent) => {
+    try {
+      const res = await api.delete(`/api/agents/${agent.id}`);
+      if (res.success) {
+        if (activeAgent?.id === agent.id) setActiveAgent(null);
+        queryClient.invalidateQueries({ queryKey: ["agents"] });
+        toast.success(`${agent.name} deleted`);
+      } else {
+        toast.error("Failed to delete agent");
+      }
+    } catch {
+      toast.error("Failed to delete agent");
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a18]">
       <div className="grid-bg fixed inset-0 pointer-events-none opacity-30" />
       <Navbar />
 
       <div className="pt-24 pb-12 px-6 max-w-7xl mx-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-white">Agents</h1>
@@ -77,7 +91,6 @@ export default function AgentsPage() {
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
-          {/* Agent grid */}
           <div className="lg:col-span-2">
             {isLoading ? (
               <div className="grid md:grid-cols-2 gap-4">
@@ -111,13 +124,13 @@ export default function AgentsPage() {
                     agent={agent}
                     isActive={activeAgent?.id === agent.id}
                     onSelect={handleSelectAgent}
+                    onDelete={handleDeleteAgent}
                   />
                 ))}
               </div>
             )}
           </div>
 
-          {/* Sidebar - Active agent + memory */}
           <div className="space-y-4">
             {activeAgent ? (
               <>

@@ -110,6 +110,21 @@ export async function DELETE(
 ) {
   try {
     const { id } = await context.params;
+
+    const createdAssets = await prisma.knowledgeAsset.findMany({
+      where: { creatorId: id },
+      select: { id: true },
+    });
+    const assetIds = createdAssets.map((a) => a.id);
+
+    await prisma.agentAsset.deleteMany({
+      where: { assetId: { in: assetIds } },
+    });
+
+    await prisma.transaction.deleteMany({
+      where: { assetId: { in: assetIds } },
+    });
+
     await prisma.agentActivity.deleteMany({ where: { agentId: id } });
     await prisma.agentMemory.deleteMany({ where: { agentId: id } });
     await prisma.transaction.deleteMany({
@@ -118,6 +133,7 @@ export async function DELETE(
     await prisma.agentAsset.deleteMany({ where: { agentId: id } });
     await prisma.knowledgeAsset.deleteMany({ where: { creatorId: id } });
     await prisma.agent.delete({ where: { id } });
+
     return NextResponse.json({ success: true, message: "Agent deleted" });
   } catch (error) {
     return NextResponse.json(

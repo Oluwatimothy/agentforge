@@ -48,18 +48,21 @@ export function AgentCard({ agent, isActive, onSelect, onDelete, compact }: Agen
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-forge-500 to-transparent" />
       )}
 
-      {onDelete && (
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            if (confirm(`Delete ${agent.name}? This cannot be undone.`)) {
-              onDelete(agent);
-            }
-          }}
-          className="absolute top-3 right-3 p-1.5 rounded-lg text-slate-600 hover:text-red-400 hover:bg-red-400/10 transition-all opacity-0 group-hover:opacity-100 z-10"
-        >
-          <Trash2 className="w-3.5 h-3.5" />
-        </button>
+     {onDelete && (
+        <div className="mt-3 pt-3 border-t border-white/5 flex justify-end">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              if (confirm(`Delete ${agent.name}? This cannot be undone.`)) {
+                onDelete(agent);
+              }
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-400/10 transition-all text-xs"
+          >
+            <Trash2 className="w-3 h-3" />
+            Delete
+          </button>
+        </div>
       )}
 
       <div className="flex items-start justify-between mb-4">
